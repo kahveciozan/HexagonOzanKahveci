@@ -1,9 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class HaxagonScript : MonoBehaviour
+public class GamePlayScript : MonoBehaviour
 {
+
+    public Text scoreText;
+    private int score;
+
     [SerializeField] private GameObject parentObject;
 
     /* --- Hexagon Variables --- */
@@ -28,36 +33,61 @@ public class HaxagonScript : MonoBehaviour
     private GridCreator gridGenarator;
     private MarkerCalculator markerCalculator;
     private MatchCalculator matchCalculator;
+    private MoveAnimation moveAnimation;
+
+    private bool animationControlStart = false;
+    private bool animationControlMoving = false;
+    bool isTouchEnd = false;
+
+    private int work3Times = 0;
 
     // Start is called before the first frame update
     void Start()
     {
+        SetGridSize();
+
         gridGenarator = new GridCreator(hexagons,exampleHexagon, rowCount,columnCount,parentObject);
         hexagons =  gridGenarator.CreateHexagons();
+
 
         markerCalculator = new MarkerCalculator(rightMarkers, leftMarkers, hexagons, rowCount, columnCount);
         rightMarkers = markerCalculator.LocationRightMarkers();
         leftMarkers  =  markerCalculator.LocationLeftMarkers();
 
-
         matchCalculator = new MatchCalculator(rowCount, columnCount, hexagons,  exampleHexagon,parentObject);
         hexagons = matchCalculator.CheckMatchHexagons();
 
+        score = 0;
+
     }
 
+    private void SetGridSize()
+    {
+        rowCount = PlayerPrefs.GetInt("RowCount");
+        columnCount = PlayerPrefs.GetInt("ColumnCount");
 
+        float markerScale = PlayerPrefs.GetFloat("MarkerScale");
+        marker.transform.localScale = new Vector3(markerScale, markerScale, 1f);
+    }
+
+ 
 
     // Update is called once per frame
     void Update()
     {
         TouchControl();
+
+        MoveAnimation();
+        RealMove();
+
+
     }
 
     private void TouchControl()
     {
-        bool isTouch = false;
 
-        if (Input.touchCount > 0)
+
+        if (Input.touchCount > 0 && !animationControlMoving)
         {
             
             theTouch = Input.GetTouch(0);
@@ -70,9 +100,6 @@ public class HaxagonScript : MonoBehaviour
 
             else if (theTouch.phase == TouchPhase.Moved || theTouch.phase == TouchPhase.Ended)
             {
-                if (theTouch.phase == TouchPhase.Ended)
-                    isTouch = true;
-
                 touchEndPosition = Camera.main.ScreenToWorldPoint(Input.GetTouch(0).position);
                 float x = touchEndPosition.x - touchStartPosition.x;
                 float y = touchEndPosition.y - touchStartPosition.y;
@@ -87,34 +114,24 @@ public class HaxagonScript : MonoBehaviour
                 }
                 else if (Mathf.Abs(x) > Mathf.Abs(y))
                 {
-                    playerDirectionX = x > 0 ? 1 : -1;
+                    playerDirectionX = x > 0 ? 1 : -1;                                                      // Open Here to Chance the Rotation
                     playerDirectionY = 0;
 
-                    
-
-                    // If Swipe The hexs around marker revolves
-
-                    
-                    if (isTouch)
+                    if (theTouch.phase == TouchPhase.Ended)                                                 // --------------------------------- Kontrol Noktasi
                     {
-                        Debug.Log("KAYDIRMA OLDU");
-                        isTouch = false;
-                        //for (int i = 0; i < 3; i++)
-                        //{
+                        animationControlStart = true;
+                        isTouchEnd = true;
+                        animationControlMoving = true;
+                        work3Times = 0;
 
-
-                        hexagons = matchCalculator.FindAroundMarker( lastMarkerX,  lastMarkerY,  lastMarkerRotation);
-                           
-
-                        //}
-                            
                     }
-                        
                 }
                 else
                 {
                     playerDirectionY = y > 0 ? 1 : -1;
                     playerDirectionX = 0;
+
+                    // *** TO DO ***  
                 }
             }
         }
@@ -155,10 +172,58 @@ public class HaxagonScript : MonoBehaviour
                 }
 
 
-
-
             }
         } 
+    }
+
+
+    private void MoveAnimation()
+    {
+        if (animationControlStart)
+        {
+            moveAnimation = new MoveAnimation(hexagons, lastMarkerX, lastMarkerY, lastMarkerRotation);
+            animationControlStart = false;
+        }
+
+
+
+        if (animationControlMoving)
+        {
+            bool a = moveAnimation.startAnimation(Time.deltaTime * 20f);
+
+            if (!a)
+                animationControlMoving = false;
+
+        }
+    }
+
+    private void RealMove()
+    {
+        if (isTouchEnd && !animationControlMoving)
+        {
+            isTouchEnd = false;
+
+            hexagons = matchCalculator.FindAroundMarker(lastMarkerX, lastMarkerY, lastMarkerRotation);
+
+            //score = matchCalculator.Score();
+
+            
+
+            if (work3Times < 2 && !matchCalculator.isMatch())
+            {
+                work3Times++;
+                animationControlStart = true;
+                isTouchEnd = true;
+                animationControlMoving = true;
+            }
+
+            if (matchCalculator.isMatch())
+            {
+                score = score + 15;
+            }
+
+            scoreText.text = "SKOR: " + score;
+        }
     }
 
    

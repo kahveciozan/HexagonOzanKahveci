@@ -4,15 +4,27 @@ using UnityEngine;
 
 public class Hexagon : MonoBehaviour
 {
-    [SerializeField] private int colorCount = 9;
+    [SerializeField] private int colorCount = 5;
 
     private void Awake()
     {
+        SetColorCount();
+
         transform.Rotate(new Vector3(0, 0, 90));
 
 
         RandomColor(colorCount);
 
+    }
+
+
+    private void SetColorCount()
+    {
+         colorCount =  PlayerPrefs.GetInt("ColorCount");
+
+         float scale = PlayerPrefs.GetFloat("HexagonScale");
+
+         gameObject.transform.localScale = new Vector3(scale, scale, 1);
     }
 
     public void RandomColor(int colorCount)
