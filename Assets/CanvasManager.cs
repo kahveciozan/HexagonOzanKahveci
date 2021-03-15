@@ -10,6 +10,12 @@ public class CanvasManager : MonoBehaviour
         SceneManager.LoadScene("MainMenu");
     }
 
+    //Button OnClick
+    public void PlayAgain()
+    {
+        SceneManager.LoadScene("GamePlay");
+    }
+
 
 
 }

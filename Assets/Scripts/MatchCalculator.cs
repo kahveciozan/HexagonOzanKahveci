@@ -7,14 +7,13 @@ public class MatchCalculator : MonoBehaviour
     private int rowCount, columnCount;
     private GameObject[,] hexagons;
     private GameObject exampleHexagon;
-
     private GameObject parentObject;
 
     private bool checkAgain;
-
     private bool eslestiMi = false;
-
     private int score = 0;
+
+    
     public MatchCalculator(int rowCount, int columnCount, GameObject[,] hexagons, GameObject exampleHexagon, GameObject parentObject)
     {
         this.rowCount = rowCount;
@@ -26,6 +25,7 @@ public class MatchCalculator : MonoBehaviour
         
     }
 
+    // Chaeck Matcing Hexagon, If tree hexs check,  Destroy them 
     public GameObject[,] CheckMatchHexagons()
     {
 
@@ -118,10 +118,6 @@ public class MatchCalculator : MonoBehaviour
                         score = score + 15;
                         DestroyAndCreate(d1i, d1j, d2i, d2j, d3i, d3j);
 
-
-
-                        //FallingIntoVacancies(d1j, d1j, d2i, d2j, d3i, d3j);
-
                         checkAgain = true;
                         eslestiMi = true;
                     }
@@ -168,59 +164,9 @@ public class MatchCalculator : MonoBehaviour
     }
 
 
-    private void FallingIntoVacancies(int t1i,int t1j,int t2i, int t2j,int t3i,int t3j)
-    {
-        string tag1, tag2, tag3;
-        tag1 = hexagons[t1i, t1j].transform.tag; 
-        tag2 = hexagons[t2i, t2j].transform.tag; 
-        tag3 = hexagons[t3i, t3j].transform.tag;
-
-        if (true)
-        {
-            for (int j = t1j; j < columnCount - 3; j++)
-            {
-
-                hexagons[t1i, j].tag = hexagons[t1i, j + 2].tag;
-                Debug.Log(j + "kere +2 girdi");
-            }
-
-            for (int j = t3j; j < columnCount - 2; j++)
-            {
-                hexagons[t3i, j].tag = hexagons[t3i, j + 1].tag;
-                Debug.Log(j + "kere +1 girdi");
-            }
-
-            hexagons[t1i, columnCount - 2].tag = tag1;
-            hexagons[t2i, columnCount - 1].tag = tag2;
-            hexagons[t3i, columnCount - 1].tag = tag3;
-
-        }
-        else
-        {
-            for (int j = t1j; j < columnCount - 2; j++)
-            {
-
-                hexagons[t1i, j].tag = hexagons[t1i, j + 1].tag;
-            }
-
-            for (int j = t3j; j < columnCount - 1; j++)
-            {
-                hexagons[t3i, j].tag = hexagons[t3i, j + 1].tag;
-            }
-
-
-            hexagons[t1i, columnCount - 1].tag = tag1;
-            hexagons[t2i, columnCount - 1].tag = tag2;
-            hexagons[t3i, columnCount - 2].tag = tag3;
-        }
-
-        
-
-
-    }
-
     /*------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+    // Find hexagons around the marker
     public GameObject[,] FindAroundMarker(int lastMarkerX, int lastMarkerY, bool lastMarkerRotation)
     {
         eslestiMi = false;
@@ -278,9 +224,33 @@ public class MatchCalculator : MonoBehaviour
         return hexagons;
     }
 
-
+    // Change Hexs tag and Bomb Image each other
     private void ExchangeHexsTag(int t1i,int t1j, int t2i, int t2j,int t3i,int t3j)
     {
+
+        /* -----  Change Bobm Image --------*/
+        if (hexagons[t1i, t1j].transform.GetChild(1).gameObject.activeSelf)
+        {
+            hexagons[t1i, t1j].transform.GetChild(1).gameObject.SetActive(false);
+            hexagons[t2i, t2j].transform.GetChild(1).gameObject.SetActive(true);
+        }
+
+        else if (hexagons[t2i, t2j].transform.GetChild(1).gameObject.activeSelf )
+        {
+            hexagons[t2i, t2j].transform.GetChild(1).gameObject.SetActive(false);
+            hexagons[t3i, t3j].transform.GetChild(1).gameObject.SetActive(true);
+        }
+
+        else if (hexagons[t3i, t3j].transform.GetChild(1).gameObject.activeSelf )
+        {
+            hexagons[t3i, t3j].transform.GetChild(1).gameObject.SetActive(false);
+            hexagons[t1i, t1j].transform.GetChild(1).gameObject.SetActive(true);
+        }
+
+
+
+        /* -------  Change Hexagon tag -------*/
+
         string g1, g2, g3;
 
         g1 = hexagons[t1i, t1j].tag;

@@ -39,9 +39,6 @@ public class MenuManager : MonoBehaviour
 
     }
 
-
-
-
     // Button OnClick
     public void GoToGamePlay()
     {
@@ -53,7 +50,7 @@ public class MenuManager : MonoBehaviour
         SceneManager.LoadScene("MainMenu");
     }
 
-    // Oen Pop Up Settings Menu
+    // Oen Pop Up Settings Menu -- Button OnClick
     public void OpenPopUp()
     {
         settingsPopUp.SetActive(true);
@@ -67,18 +64,17 @@ public class MenuManager : MonoBehaviour
     }
 
 
-
+    // Button OnClick
     public void ChooseColorCount(int colorCount)
     {
         PlayerPrefs.SetInt("ColorCount", colorCount);
     }
 
+    // Button OnClick
     public void ChooseGridSize(int rowCount)
     {
         PlayerPrefs.SetInt("RowCount", rowCount);
         PlayerPrefs.SetInt("ColumnCount", rowCount+1);
-
-
 
         switch (rowCount)
         {
@@ -96,12 +92,6 @@ public class MenuManager : MonoBehaviour
                 break;
 
         }
-
-
-
-
-
     }
-
 
 }

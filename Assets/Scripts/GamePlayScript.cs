@@ -5,9 +5,16 @@ using UnityEngine.UI;
 
 public class GamePlayScript : MonoBehaviour
 {
-
+    /*  --- UI variables --- */
     public Text scoreText;
     private int score;
+    
+    /* --- Bomb Variables ---*/
+    public GameObject bombImage;
+    private int bombControl;
+    private int bombCountDown = 10;                                 // < ---
+    public GameObject gameOverPopUp;
+    private int bombScorNumber = 100;                               // < --- 
 
     [SerializeField] private GameObject parentObject;
 
@@ -41,7 +48,11 @@ public class GamePlayScript : MonoBehaviour
 
     private int work3Times = 0;
 
-    // Start is called before the first frame update
+
+    private void Awake()
+    {
+        Hexagon.isBomb = false;
+    }
     void Start()
     {
         SetGridSize();
@@ -58,9 +69,11 @@ public class GamePlayScript : MonoBehaviour
         hexagons = matchCalculator.CheckMatchHexagons();
 
         score = 0;
+        
 
     }
 
+    // Set Grid Size and Marker Scale
     private void SetGridSize()
     {
         rowCount = PlayerPrefs.GetInt("RowCount");
@@ -80,12 +93,17 @@ public class GamePlayScript : MonoBehaviour
         MoveAnimation();
         RealMove();
 
+        if (bombControl > bombScorNumber)
+        {
+            Hexagon.isBomb = true;
+            bombControl = 0;
+        }
 
     }
 
+    // Touch and Swipe Input System
     private void TouchControl()
     {
-
 
         if (Input.touchCount > 0 && !animationControlMoving)
         {
@@ -114,7 +132,7 @@ public class GamePlayScript : MonoBehaviour
                 }
                 else if (Mathf.Abs(x) > Mathf.Abs(y))
                 {
-                    playerDirectionX = x > 0 ? 1 : -1;                                                      // Open Here to Chance the Rotation
+                    playerDirectionX = x > 0 ? 1 : -1;                                                      // TO DO  (Open Here to Chance the Rotation)
                     playerDirectionY = 0;
 
                     if (theTouch.phase == TouchPhase.Ended)                                                 // --------------------------------- Kontrol Noktasi
@@ -219,11 +237,51 @@ public class GamePlayScript : MonoBehaviour
 
             if (matchCalculator.isMatch())
             {
+
+                if (bombCountDown == 0)
+                {
+                    gameOverPopUp.SetActive(true);
+                }
+
                 score = score + 15;
+                bombControl = bombControl + 15;
+
+                if (IsThereBomb())
+                {
+                    bombImage.SetActive(true);
+                    bombImage.transform.GetChild(0).gameObject.GetComponent<Text>().text= "" + bombCountDown;
+                    bombCountDown--;
+                }
+                else
+                {
+                    bombImage.SetActive(false);
+                    bombCountDown = 10;
+                }
+
+
             }
 
             scoreText.text = "SKOR: " + score;
+
         }
+    }
+
+    // If there is any bonb on Screen method returns true
+    private bool IsThereBomb()
+    {
+        for(int i=0; i<rowCount; i++)
+        {
+            for(int j =0; j < columnCount; j++)
+            {
+                if (hexagons[i, j].transform.GetChild(1).gameObject.activeSelf)
+                {
+                    return true;
+                }
+
+
+            }
+        }
+        return false;
     }
 
    

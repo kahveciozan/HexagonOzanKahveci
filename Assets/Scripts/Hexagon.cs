@@ -5,15 +5,20 @@ using UnityEngine;
 public class Hexagon : MonoBehaviour
 {
     [SerializeField] private int colorCount = 5;
+    public static bool isBomb = false;
 
     private void Awake()
     {
         SetColorCount();
-
         transform.Rotate(new Vector3(0, 0, 90));
-
-
         RandomColor(colorCount);
+
+
+        if(isBomb)
+        {
+            gameObject.transform.GetChild(1).gameObject.SetActive(true);
+            isBomb = false;
+        }
 
     }
 
@@ -23,7 +28,6 @@ public class Hexagon : MonoBehaviour
          colorCount =  PlayerPrefs.GetInt("ColorCount");
 
          float scale = PlayerPrefs.GetFloat("HexagonScale");
-
          gameObject.transform.localScale = new Vector3(scale, scale, 1);
     }
 
